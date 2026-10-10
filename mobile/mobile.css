@@ -88,3 +88,145 @@ body.mobile-chat-open .chat-stage{display:flex!important;grid-column:1;grid-row:
 .content .page-intro{gap:12px!important;align-items:flex-start!important}
 .content .page-wrap input,.content .page-wrap textarea,.content .page-wrap select{font-size:16px!important;max-width:100%}
 .content .page-wrap button{touch-action:manipulation}
+
+
+/* NOVA Mobile polish pass: consistent depth, touch feedback and safe-area handling */
+:root{
+  --nova-glass:rgba(25,27,44,.82);
+  --nova-border:rgba(177,180,255,.13);
+  --nova-shadow:0 18px 50px rgba(0,0,0,.22);
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:
+  radial-gradient(ellipse at 8% -10%,rgba(115,108,255,.16),transparent 38%),
+  radial-gradient(ellipse at 100% 28%,rgba(68,204,222,.06),transparent 32%),
+  #10111c!important}
+button,input,textarea{accent-color:#8986ff}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
+  outline:2px solid #9b99ff!important;outline-offset:3px
+}
+.mobile-bottom-nav{
+  padding-left:max(8px,env(safe-area-inset-left));
+  padding-right:max(8px,env(safe-area-inset-right));
+  background:rgba(15,16,28,.88)!important;
+  border-top:1px solid rgba(176,177,255,.14)!important;
+  box-shadow:0 -12px 36px rgba(0,0,0,.16)
+}
+.mobile-nav-item{transition:background .18s ease,color .18s ease,transform .18s ease}
+.mobile-nav-item:active{transform:scale(.94)}
+.mobile-nav-item.active{box-shadow:inset 0 0 0 1px rgba(156,151,255,.13)}
+.topbar{
+  background:rgba(16,17,28,.82)!important;
+  border-bottom-color:rgba(177,180,255,.12)!important;
+  box-shadow:0 6px 28px rgba(0,0,0,.08)
+}
+.topbar h2{letter-spacing:-.35px!important}
+.currency-pill{
+  border:1px solid rgba(161,154,255,.2)!important;
+  border-radius:999px!important;
+  background:linear-gradient(135deg,rgba(128,120,255,.17),rgba(71,214,226,.07))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)
+}
+.panel-heading h3,.content .page-intro h3{letter-spacing:-.35px}
+.chat-search,.search-people{
+  background:rgba(30,32,49,.78)!important;
+  border-color:rgba(173,177,255,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)
+}
+.chat-search:focus-within,.search-people:focus-within{
+  border-color:rgba(144,139,255,.7)!important;
+  box-shadow:0 0 0 3px rgba(132,126,255,.1)
+}
+.chat-item{
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+  border-color:transparent!important
+}
+.chat-item:active{transform:scale(.99)}
+.chat-item.selected,.chat-item-unread{
+  background:linear-gradient(100deg,rgba(123,119,245,.15),rgba(40,43,64,.6))!important;
+  border-color:rgba(149,145,255,.18)!important
+}
+.chat-item-unread .chat-item-copy strong{color:#dcd9ff}
+.chat-item-copy small{line-height:1.4}
+.chat-stage{background:
+  radial-gradient(ellipse at 50% 0%,rgba(104,98,212,.12),transparent 45%),
+  #11131f!important}
+.conversation-head{
+  background:rgba(20,22,36,.9)!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.1);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+}
+.message-row{animation:novaMessageIn .18s ease-out both}
+.message-bubble{
+  border-color:rgba(179,182,255,.13)!important;
+  box-shadow:0 4px 12px rgba(0,0,0,.07)
+}
+.message-row.mine .message-bubble{
+  background:linear-gradient(135deg,#686ce0,#7971db)!important;
+  border-color:rgba(196,192,255,.3)!important;
+  box-shadow:0 6px 20px rgba(91,83,210,.17)
+}
+.message-composer{
+  padding-left:max(10px,env(safe-area-inset-left))!important;
+  padding-right:max(10px,env(safe-area-inset-right))!important;
+  box-shadow:0 -8px 30px rgba(0,0,0,.09)
+}
+.message-composer textarea{
+  border:1px solid rgba(176,180,255,.14)!important;
+  background:rgba(35,37,56,.94)!important;
+  transition:border-color .18s ease,box-shadow .18s ease
+}
+.message-composer textarea:focus{
+  border-color:rgba(145,140,255,.65)!important;
+  box-shadow:0 0 0 3px rgba(132,126,255,.09)
+}
+.media-attach-button,.send-button{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  transition:transform .15s ease,filter .15s ease
+}
+.media-attach-button:active,.send-button:active{transform:scale(.94)}
+.send-button{background:linear-gradient(145deg,#8985ff,#6f70df)!important}
+.content>.page-wrap{padding-bottom:calc(22px + env(safe-area-inset-bottom))!important}
+.content .person-card,.content .helper-card,.content .profile-form,
+.content .gift-product,.content .premium-card{
+  border-color:rgba(177,180,255,.14)!important;
+  background:linear-gradient(145deg,rgba(29,31,49,.94),rgba(23,25,39,.96))!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.09)
+}
+.content .primary-button{
+  box-shadow:0 8px 22px rgba(113,105,232,.2);
+  transition:transform .15s ease,filter .15s ease
+}
+.content .primary-button:active{transform:scale(.98)}
+.toast{
+  bottom:calc(var(--mobile-nav-height) + 14px + env(safe-area-inset-bottom))!important;
+  border-color:rgba(173,176,255,.22)!important;
+  background:rgba(35,37,57,.96)!important;
+  box-shadow:0 18px 45px rgba(0,0,0,.35)!important;
+  backdrop-filter:blur(18px)
+}
+.gift-picker-layer,.camera-capture-layer{
+  padding:12px max(12px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;
+  background:rgba(4,5,13,.72)!important;
+  backdrop-filter:blur(10px)
+}
+.gift-picker-card{
+  border:1px solid rgba(177,180,255,.18)!important;
+  background:linear-gradient(150deg,#22243a,#151725)!important;
+  box-shadow:0 25px 80px rgba(0,0,0,.45)!important
+}
+.camera-capture-card video{
+  display:block;width:100%;max-height:52dvh;object-fit:cover;
+  border:1px solid rgba(177,180,255,.17);border-radius:18px;background:#080911
+}
+@keyframes novaMessageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:360px){
+  .mobile-nav-item small{font-size:8px}
+  .mobile-nav-item{font-size:17px}
+  .chat-item{gap:8px!important;padding-left:7px!important;padding-right:7px!important}
+  .chat-item .avatar{width:43px!important;height:43px!important;min-width:43px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .message-row{animation:none!important}
+  .mobile-nav-item,.chat-item,.primary-button,.media-attach-button,.send-button{transition:none!important}
+}
