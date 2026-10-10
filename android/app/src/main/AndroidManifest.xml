@@ -6,12 +6,14 @@
     <application
         android:allowBackup="false"
         android:label="NOVA Messenger"
+        android:icon="@drawable/ic_nova_launcher"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:usesCleartextTraffic="false">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
