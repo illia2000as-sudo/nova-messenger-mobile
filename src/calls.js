@@ -75,26 +75,39 @@ export function createCallSystem(api) {
       try { callPopup?.focus(); } catch (_) {}
       return;
     }
-    try {
-      if (!callPopup || callPopup.closed) {
-        callPopup = window.open("", "nova-call-window", "width=430,height=700,resizable=yes,scrollbars=no");
-      }
-    } catch (_) { callPopup = null; }
-    if (!callPopup) {
-      toast("Окно звонка заблокировано. Разреши всплывающие окна для NOVA.", true);
-      throw new Error("Не удалось открыть окно звонка.");
+    // Android WebView and mobile browsers may not support window.open. Use an
+    // in-page call overlay there; keep the separate desktop call window when available.
+    const mobileHost = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (window.matchMedia && window.matchMedia("(max-width: 620px)").matches);
+    if (!mobileHost) {
+      try {
+        if (!callPopup || callPopup.closed) {
+          callPopup = window.open("", "nova-call-window", "width=430,height=700,resizable=yes,scrollbars=no");
+        }
+      } catch (_) { callPopup = null; }
     }
-    const popup = callPopup;
-    popup.document.open();
-    popup.document.write('<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NOVA · Звонок</title><style> *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#8c80ff25,transparent 50%),linear-gradient(155deg,#111625,#090c14);color:#f4f5ff;font:14px Segoe UI,Arial,sans-serif;display:grid;place-items:center;padding:18px} .call-layer{width:100%;display:grid;place-items:center}.call-layer[hidden],[hidden]{display:none!important}.call-card{width:100%;max-width:390px;text-align:center;padding:28px 22px 22px;border:1px solid #ffffff20;border-radius:25px;background:linear-gradient(155deg,#1d2435,#111622);box-shadow:0 25px 80px #0009}.call-orb{width:82px;height:82px;margin:0 auto 18px;display:grid;place-items:center;border-radius:28px;background:linear-gradient(145deg,#777cf4,#9a7ee9);font-size:34px;animation:pulse 2s ease-in-out infinite}.call-eyebrow{font-size:9px;letter-spacing:2.5px;font-weight:800;color:#aaa7ff}.call-card h2{margin:10px 0;font-size:23px}.call-person{margin:0;color:#d7d9ec;font-size:14px}.call-status{min-height:18px;margin:12px 0 20px;color:#a6aec7;font-size:12px}#callRemoteAudio{display:none}.call-controls{display:flex;justify-content:center;align-items:center;gap:16px;margin:16px 0}.call-control{width:54px;height:54px;border:1px solid #ffffff20;border-radius:18px;background:#2c3347;color:#fff;font-size:21px;cursor:pointer}.call-control:hover{filter:brightness(1.15)}.call-control.muted{background:#55402e}.call-control.hangup{background:linear-gradient(145deg,#f05e78,#c93859);border:0;border-radius:50%;transform:rotate(135deg)}.call-incoming-actions{display:flex;gap:10px;margin-top:12px}.call-incoming-actions[hidden]{display:none}.call-incoming-actions button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;font-size:12px;font-weight:800;cursor:pointer}.call-reject{background:#71334a}.call-accept{background:linear-gradient(120deg,#23966e,#37b68a)}.call-footnote{margin:18px 0 0;color:#858eaa;font-size:10px}.call-video-stage{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:16px;background:#070a10}.call-remote-video{width:100%;height:100%;object-fit:cover}.call-local-video{position:absolute;right:10px;bottom:10px;width:28%;border-radius:10px;border:1px solid #ffffff55}.sharing{background:#246a5c!important}@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 28px #7977ff25}50%{transform:scale(1.04);box-shadow:0 0 52px #7977ff55}}</style></head><body></body></html>');
-    popup.document.close();
-    popup.document.title = "NOVA · Звонок";
-    const layer = popup.document.createElement("div");
+    const popup = callPopup && !callPopup.closed ? callPopup : null;
+    const targetDoc = popup ? popup.document : document;
+    if (popup) {
+      popup.document.open();
+      popup.document.write('<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NOVA · Звонок</title><style> *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#8c80ff25,transparent 50%),linear-gradient(155deg,#111625,#090c14);color:#f4f5ff;font:14px Segoe UI,Arial,sans-serif;display:grid;place-items:center;padding:18px} .call-layer{width:100%;display:grid;place-items:center}.call-layer[hidden],[hidden]{display:none!important}.call-card{width:100%;max-width:390px;text-align:center;padding:28px 22px 22px;border:1px solid #ffffff20;border-radius:25px;background:linear-gradient(155deg,#1d2435,#111622);box-shadow:0 25px 80px #0009}.call-orb{width:82px;height:82px;margin:0 auto 18px;display:grid;place-items:center;border-radius:28px;background:linear-gradient(145deg,#777cf4,#9a7ee9);font-size:34px;animation:pulse 2s ease-in-out infinite}.call-eyebrow{font-size:9px;letter-spacing:2.5px;font-weight:800;color:#aaa7ff}.call-card h2{margin:10px 0;font-size:23px}.call-person{margin:0;color:#d7d9ec;font-size:14px}.call-status{min-height:18px;margin:12px 0 20px;color:#a6aec7;font-size:12px}#callRemoteAudio{display:none}.call-controls{display:flex;justify-content:center;align-items:center;gap:16px;margin:16px 0}.call-control{width:54px;height:54px;border:1px solid #ffffff20;border-radius:18px;background:#2c3347;color:#fff;font-size:21px;cursor:pointer}.call-control:hover{filter:brightness(1.15)}.call-control.muted{background:#55402e}.call-control.hangup{background:linear-gradient(145deg,#f05e78,#c93859);border:0;border-radius:50%;transform:rotate(135deg)}.call-incoming-actions{display:flex;gap:10px;margin-top:12px}.call-incoming-actions[hidden]{display:none}.call-incoming-actions button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;font-size:12px;font-weight:800;cursor:pointer}.call-reject{background:#71334a}.call-accept{background:linear-gradient(120deg,#23966e,#37b68a)}.call-footnote{margin:18px 0 0;color:#858eaa;font-size:10px}.call-video-stage{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:16px;background:#070a10}.call-remote-video{width:100%;height:100%;object-fit:cover}.call-local-video{position:absolute;right:10px;bottom:10px;width:28%;border-radius:10px;border:1px solid #ffffff55}.sharing{background:#246a5c!important}@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 28px #7977ff25}50%{transform:scale(1.04);box-shadow:0 0 52px #7977ff55}}</style></head><body></body></html>');
+      popup.document.close();
+      popup.document.title = "NOVA · Звонок";
+    } else {
+      let callStyle = document.getElementById("novaCallStyles");
+      if (!callStyle) {
+        callStyle = document.createElement("style");
+        callStyle.id = "novaCallStyles";
+        callStyle.textContent = '#novaCallLayer{position:fixed;inset:0;z-index:10000;min-height:100dvh;padding:18px;overflow:auto;background:radial-gradient(ellipse at 50% 0%,#8c80ff25,transparent 50%),linear-gradient(155deg,#111625,#090c14);color:#f4f5ff;font:14px "Segoe UI",Arial,sans-serif;display:grid;place-items:center}#novaCallLayer[hidden]{display:none!important}#novaCallLayer .call-card{width:100%;max-width:390px;text-align:center;padding:28px 22px 22px;border:1px solid #ffffff20;border-radius:25px;background:linear-gradient(155deg,#1d2435,#111622);box-shadow:0 25px 80px #0009}#novaCallLayer .call-orb{width:82px;height:82px;margin:0 auto 18px;display:grid;place-items:center;border-radius:28px;background:linear-gradient(145deg,#777cf4,#9a7ee9);font-size:34px;animation:novaCallPulse 2s ease-in-out infinite}#novaCallLayer .call-eyebrow{font-size:9px;letter-spacing:2.5px;font-weight:800;color:#aaa7ff}#novaCallLayer .call-card h2{margin:10px 0;font-size:23px}#novaCallLayer .call-person{margin:0;color:#d7d9ec;font-size:14px}#novaCallLayer .call-status{min-height:18px;margin:12px 0 20px;color:#a6aec7;font-size:12px}#novaCallLayer #callRemoteAudio{display:none}#novaCallLayer .call-controls{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0}#novaCallLayer .call-control{width:54px;height:54px;border:1px solid #ffffff20;border-radius:18px;background:#2c3347;color:#fff;font-size:21px;cursor:pointer}#novaCallLayer .call-control.hangup{background:linear-gradient(145deg,#f05e78,#c93859);border:0;border-radius:50%;transform:rotate(135deg)}#novaCallLayer .call-incoming-actions{display:flex;gap:10px;margin-top:12px}#novaCallLayer .call-incoming-actions[hidden],[hidden]{display:none!important}#novaCallLayer .call-incoming-actions button{flex:1;border:0;border-radius:12px;padding:13px 8px;color:white;font-size:12px;font-weight:800}#novaCallLayer .call-reject{background:#71334a}#novaCallLayer .call-accept{background:linear-gradient(120deg,#23966e,#37b68a)}#novaCallLayer .call-footnote{margin:18px 0 0;color:#858eaa;font-size:10px}#novaCallLayer .call-video-stage{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:16px;background:#070a10}#novaCallLayer .call-remote-video{width:100%;height:100%;object-fit:cover}#novaCallLayer .call-local-video{position:absolute;right:10px;bottom:10px;width:28%;border-radius:10px;border:1px solid #ffffff55}@keyframes novaCallPulse{0%,100%{transform:scale(1);box-shadow:0 0 28px #7977ff25}50%{transform:scale(1.04);box-shadow:0 0 52px #7977ff55}}';
+        document.head.appendChild(callStyle);
+      }
+    }
+    const layer = targetDoc.createElement("div");
     layer.id = "novaCallLayer";
     layer.className = "call-layer";
     layer.hidden = true;
     layer.innerHTML = '<section class="call-card" role="dialog" aria-modal="true" aria-labelledby="callTitle"><div class="call-orb" id="callOrb">☎</div><div class="call-eyebrow">NOVA · CALL</div><h2 id="callTitle">Аудиозвонок</h2><p id="callPerson" class="call-person">Пользователь NOVA</p><p id="callStatus" class="call-status">Подключаемся…</p><div id="callVideoStage" class="call-video-stage" hidden><video id="callRemoteVideo" class="call-remote-video" autoplay playsinline></video><video id="callLocalVideo" class="call-local-video" autoplay muted playsinline></video></div><audio id="callRemoteAudio" autoplay></audio><div class="call-controls"><button id="callMuteBtn" class="call-control mute" type="button" title="Выключить микрофон">🎙</button><button id="callCameraBtn" class="call-control camera" type="button" title="Выключить камеру" hidden>📹</button><button id="callScreenBtn" class="call-control screen" type="button" title="Показать экран">🖥️</button><button id="callHangupBtn" class="call-control hangup" type="button" title="Завершить звонок">☎</button></div><div id="callIncomingActions" class="call-incoming-actions" hidden><button id="callRejectBtn" class="call-reject" type="button">Отклонить</button><button id="callAcceptBtn" class="call-accept" type="button">Ответить</button></div><p id="callFootnote" class="call-footnote">Только голос · камера не используется</p></section>';
-    popup.document.body.appendChild(layer);
+    targetDoc.body.appendChild(layer);
     audioElement = layer.querySelector("#callRemoteAudio");
     remoteVideoElement = layer.querySelector("#callRemoteVideo");
     localVideoElement = layer.querySelector("#callLocalVideo");
@@ -104,7 +117,7 @@ export function createCallSystem(api) {
     layer.querySelector("#callMuteBtn").addEventListener("click", toggleMute);
     layer.querySelector("#callAcceptBtn").addEventListener("click", acceptIncoming);
     layer.querySelector("#callRejectBtn").addEventListener("click", rejectIncoming);
-    popup.onbeforeunload = () => {
+    if (popup) popup.onbeforeunload = () => {
       if (popup.__novaClosing) return;
       stopRingtone();
       if (activeCallId) endCall(true);
