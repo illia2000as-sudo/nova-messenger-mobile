@@ -139,7 +139,7 @@ export function createCallSystem(api) {
     layer.querySelector("#callOrb").hidden = activeCallType === "video";
     layer.querySelector("#callVideoStage").hidden = activeCallType !== "video";
     layer.querySelector("#callCameraBtn").hidden = incoming || activeCallType !== "video";
-    layer.querySelector("#callScreenBtn").hidden = incoming || activeCallType !== "video";
+    layer.querySelector("#callScreenBtn").hidden = incoming || activeCallType !== "video" || !navigator.mediaDevices?.getDisplayMedia;
     layer.querySelector("#callFootnote").textContent = activeCallType === "video" ? "Видео и звук · камера работает только во время звонка" : "Только голос · камера не используется";
   }
 
