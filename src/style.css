@@ -469,3 +469,41 @@ input:not([type=checkbox]):not([type=radio]),textarea,select{transition:border-c
 .camera-capture-status{min-height:18px;color:#a9b1ca;font-size:11px;margin:12px 0 0}
 .camera-capture-button{font-size:19px}
 @media(max-width:620px){.camera-capture-card{padding:20px 14px}.camera-capture-actions .primary-button{flex:1}}
+
+
+/* NOVA desktop polish pass */
+:root{--focus-ring:rgba(143,139,255,.72)}
+button,input,textarea,select{accent-color:#8986ff}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--focus-ring);outline-offset:3px
+}
+::selection{background:rgba(137,132,255,.35);color:#fff}
+*{scrollbar-color:#444765 transparent;scrollbar-width:thin}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:#3a3d59;border:2px solid transparent;border-radius:99px;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:#555982;border:2px solid transparent;background-clip:padding-box}
+.nav,.chat-item,.icon-button,.small-button,.primary-button,.send-button,.gift-choice,.mobile-nav-item{
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .16s ease,filter .16s ease
+}
+.chat-item:active,.primary-button:active,.small-button:active,.send-button:active{transform:scale(.985)}
+.topbar{background:linear-gradient(100deg,#131420,#151625);border-bottom-color:rgba(167,170,255,.12)}
+.chat-list-panel{background:linear-gradient(180deg,#171824,#141520)}
+.chat-stage{background:radial-gradient(ellipse at 50% 22%,rgba(116,109,255,.08),transparent 50%),#141520}
+.conversation-head{background:rgba(26,27,42,.94);backdrop-filter:blur(16px)}
+.chat-search,.search-people{border-color:rgba(171,174,255,.14);transition:border-color .18s ease,box-shadow .18s ease}
+.chat-search:focus-within,.search-people:focus-within{border-color:#7f7be7;box-shadow:0 0 0 3px rgba(129,124,255,.1)}
+.chat-item{min-height:66px}
+.chat-item.selected,.chat-item-unread{background:linear-gradient(100deg,rgba(121,116,238,.14),rgba(38,40,60,.75))}
+.message-bubble{box-shadow:0 5px 16px rgba(0,0,0,.08)}
+.message-row{animation:novaMessageIn .16s ease-out both}
+.message-row.mine .message-bubble{box-shadow:0 7px 22px rgba(88,82,199,.16)}
+.profile-form,.person-card,.helper-card,.gift-product,.premium-card{
+  border-color:rgba(171,174,255,.14)
+}
+.primary-button{box-shadow:0 6px 20px rgba(113,105,232,.14)}
+.primary-button:hover{box-shadow:0 9px 26px rgba(113,105,232,.24)}
+.toast{backdrop-filter:blur(16px);border-color:rgba(171,174,255,.2)}
+@keyframes novaMessageIn{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
