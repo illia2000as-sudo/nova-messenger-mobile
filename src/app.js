@@ -642,27 +642,33 @@ async function saveAvatar(file) {
   if (!isImage && !isVideo) return toast("Поддерживаются JPG, PNG, WEBP, GIF, MP4 и WebM.", true);
   if (file.size > (isVideo ? 20 : 8) * 1024 * 1024) return toast(isVideo ? "Видеоаватар должен быть не больше 20 МБ." : "Фото должно быть не больше 8 МБ.", true);
   try {
-    if (isVideo) { const duration = await mediaDuration(file); if (!Number.isFinite(duration) || duration > 5.05) return toast("Видеоаватар должен длиться не больше 5 секунд.", true); }
+    if (isVideo) {
+      const duration = await mediaDuration(file);
+      if (!Number.isFinite(duration) || duration > 5.05) return toast("Видеоаватар должен длиться не больше 5 секунд.", true);
+    }
     toast("Загружаем аватар…");
     const uploaded = await uploadMedia(file, "avatars/" + currentUser.uid);
     const oldPath = currentProfile.avatarPath;
     const fields = {avatarUrl:uploaded.url,avatarPath:uploaded.path,avatarType:isVideo?"video":"image",avatarUpdatedAt:Date.now()};
+    // Save the source profile first. Secondary cached copies are best-effort:
+    // Firebase rules often correctly prevent a user from writing into another user's records.
     await update(ref(db,"users/"+currentUser.uid),fields);
+    Object.assign(currentProfile,fields);
+    updateSidebar();
+    renderProfilePage();
     const syncUpdates = {};
-    for (const [chatId, chat] of Object.entries(cachedChats || {})) {
+    for (const chatId of Object.keys(cachedChats || {})) {
       syncUpdates["userChats/"+currentUser.uid+"/"+chatId+"/avatarUrl"] = uploaded.url;
       syncUpdates["userChats/"+currentUser.uid+"/"+chatId+"/avatarType"] = fields.avatarType;
-      if (chat.withUid) {
-        syncUpdates["userChats/"+chat.withUid+"/"+chatId+"/avatarUrl"] = uploaded.url;
-        syncUpdates["userChats/"+chat.withUid+"/"+chatId+"/avatarType"] = fields.avatarType;
-      }
     }
     for (const friendUid of Object.keys(cachedFriends || {})) {
-      syncUpdates["friends/"+friendUid+"/"+currentUser.uid+"/avatarUrl"] = uploaded.url;
-      syncUpdates["friends/"+friendUid+"/"+currentUser.uid+"/avatarType"] = fields.avatarType;
+      syncUpdates["friends/"+currentUser.uid+"/"+friendUid+"/avatarUrl"] = uploaded.url;
+      syncUpdates["friends/"+currentUser.uid+"/"+friendUid+"/avatarType"] = fields.avatarType;
     }
-    if (Object.keys(syncUpdates).length) await update(ref(db),syncUpdates);
-    Object.assign(currentProfile,fields); updateSidebar(); renderProfilePage();
+    if (Object.keys(syncUpdates).length) {
+      try { await update(ref(db),syncUpdates); }
+      catch(syncError) { console.warn("NOVA avatar saved; cached copies could not all sync:",syncError); }
+    }
     if (oldPath && oldPath !== uploaded.path) deleteObject(storageRef(storage,oldPath)).catch(()=>{});
     toast("Аватар обновлён!");
   } catch(error) { toast(errorText(error),true); }
@@ -672,16 +678,22 @@ async function removeAvatar() {
   try {
     const oldPath=currentProfile.avatarPath;
     await update(ref(db,"users/"+currentUser.uid),{avatarUrl:null,avatarPath:null,avatarType:null,avatarUpdatedAt:Date.now()});
+    currentProfile.avatarUrl=null; currentProfile.avatarPath=null; currentProfile.avatarType=null;
+    updateSidebar();
+    renderProfilePage();
     const syncUpdates = {};
-    for (const [chatId, chat] of Object.entries(cachedChats || {})) {
+    for (const chatId of Object.keys(cachedChats || {})) {
       syncUpdates["userChats/"+currentUser.uid+"/"+chatId+"/avatarUrl"] = null;
       syncUpdates["userChats/"+currentUser.uid+"/"+chatId+"/avatarType"] = null;
-      if (chat.withUid) { syncUpdates["userChats/"+chat.withUid+"/"+chatId+"/avatarUrl"] = null; syncUpdates["userChats/"+chat.withUid+"/"+chatId+"/avatarType"] = null; }
     }
-    for (const friendUid of Object.keys(cachedFriends || {})) { syncUpdates["friends/"+friendUid+"/"+currentUser.uid+"/avatarUrl"] = null; syncUpdates["friends/"+friendUid+"/"+currentUser.uid+"/avatarType"] = null; }
-    if (Object.keys(syncUpdates).length) await update(ref(db),syncUpdates);
-    currentProfile.avatarUrl=null; currentProfile.avatarPath=null; currentProfile.avatarType=null;
-    updateSidebar(); renderProfilePage();
+    for (const friendUid of Object.keys(cachedFriends || {})) {
+      syncUpdates["friends/"+currentUser.uid+"/"+friendUid+"/avatarUrl"] = null;
+      syncUpdates["friends/"+currentUser.uid+"/"+friendUid+"/avatarType"] = null;
+    }
+    if (Object.keys(syncUpdates).length) {
+      try { await update(ref(db),syncUpdates); }
+      catch(syncError) { console.warn("NOVA avatar removed; cached copies could not all sync:",syncError); }
+    }
     if(oldPath) deleteObject(storageRef(storage,oldPath)).catch(()=>{});
     toast("Аватар удалён.");
   } catch(error) { toast(errorText(error),true); }
